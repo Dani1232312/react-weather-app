@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import FlagSelect from 'react-flags-select';
-
-// import 'react-flags-select/css/react-flags-select.css';
+import './styles.css';
 
 const App = () => {
   const API_KEY = process.env.REACT_APP_WEATHER_API_KEY;
@@ -12,6 +11,9 @@ const App = () => {
   const [isLoading, setLoading] = useState(false);
   const [unit, setUnit] = useState('metric'); // Default unit is Celsius
   const autocompleteRef = useRef(null);
+  const detectToggleOnce = (e) => {
+    e.target.classList.add('toggled-once');
+  };
 
   useEffect(() => {
     // Retrieve unit preference from local storage
@@ -38,8 +40,14 @@ const App = () => {
       const forecastResponse = await axios.get(
         `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}&units=${unit}`
       );
+      console.log('Weather JSON:', weatherResponse.data); // Log the weather JSON response
+      console.log('Forecast JSON:', forecastResponse.data); // Log the weather JSON response
+
+      // const convertedForecast = convertForecast(forecastResponse.data.list);
+      // setForecast(convertedForecast);
       const convertedForecast = convertForecast(forecastResponse.data.list);
-      setForecast(convertedForecast);
+      const dailyForecast = filterDailyForecast(convertedForecast); // Filter daily forecast
+      setForecast(dailyForecast);
     } catch (error) {
       console.error(error);
     } finally {
@@ -60,8 +68,8 @@ const App = () => {
         const dayForecasts = forecastList.filter(
           (f) => new Date(f.dt_txt).toDateString() === day
         );
-        const maxTemp = Math.max(...dayForecasts.map((f) => f.main.temp));
-        const minTemp = Math.min(...dayForecasts.map((f) => f.main.temp));
+        const maxTemp = Math.max(...dayForecasts.map((f) => f.main.temp_max));
+        const minTemp = Math.min(...dayForecasts.map((f) => f.main.temp_min));
         dailyForecast.push({ ...forecast, main: { temp_max: maxTemp, temp_min: minTemp } });
       }
     });
@@ -210,7 +218,7 @@ const App = () => {
     height: 'auto',
     marginRight: '0.5em',
   };
-
+  
   const getImageUrl = (iconCode) => `https://openweathermap.org/img/wn/${iconCode}.png`;
 
   function getFlagEmoji(countryCode) {
@@ -240,6 +248,12 @@ const App = () => {
         <button type="button" style={{ ...buttonStyle, marginLeft: '0.5em' }} onClick={handleRetrieveLocation}>
           Use Current Location
         </button>
+        {/* <div class="toggle-container green">
+          <input class="toggle-checkbox" type="checkbox" onClick={detectToggleOnce}/>
+          <div class="toggle-track">  
+            <div class="toggle-thumb"></div>
+          </div>
+        </div> */}
       </form>
       {weather && (
         <div style={weatherStyle}>
@@ -277,9 +291,9 @@ const App = () => {
           </div>
         </div>
       )}
-      <button type="button" style={buttonStyle} onClick={toggleUnit}>
+      {/* <button type="button" style={buttonStyle} onClick={toggleUnit}>
         Switch to {unit === 'metric' ? 'Fahrenheit' : 'Celsius'}
-      </button>
+      </button> */}
     </div>
   );
 };
