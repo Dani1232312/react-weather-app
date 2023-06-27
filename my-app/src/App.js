@@ -17,10 +17,28 @@ const App = () => {
       const forecastResponse = await axios.get(
         `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${API_KEY}`
       );
-      setForecast(forecastResponse.data.list);
+      const dailyForecast = filterDailyForecast(forecastResponse.data.list);
+      setForecast(dailyForecast);
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const filterDailyForecast = (forecastList) => {
+    const dailyForecast = [];
+    const processedDays = new Set();
+
+    forecastList.forEach((forecast) => {
+      const date = new Date(forecast.dt_txt);
+      const day = date.toDateString();
+
+      if (!processedDays.has(day)) {
+        processedDays.add(day);
+        dailyForecast.push(forecast);
+      }
+    });
+
+    return dailyForecast;
   };
 
   const handleSubmit = (event) => {
