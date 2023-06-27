@@ -46,6 +46,39 @@ const App = () => {
     getWeather();
   };
 
+  const handleRetrieveLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          getWeatherByLocation(latitude, longitude);
+        },
+        (error) => {
+          console.error('Error retrieving location:', error);
+        }
+      );
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+
+  const getWeatherByLocation = async (latitude, longitude) => {
+    try {
+      const weatherResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+      );
+      setWeather(weatherResponse.data);
+
+      const forecastResponse = await axios.get(
+        `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${API_KEY}`
+      );
+      const dailyForecast = filterDailyForecast(forecastResponse.data.list);
+      setForecast(dailyForecast);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const appStyle = {
     fontFamily: 'Arial, sans-serif',
     textAlign: 'center',
@@ -102,16 +135,19 @@ const App = () => {
   return (
     <div style={appStyle}>
       <h1>Weather App</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <input
           type="text"
           value={city}
           onChange={(e) => setCity(e.target.value)}
           placeholder="Enter city..."
-          style={inputStyle}
+          style={{ ...inputStyle, width: '40%', borderRadius: '10px 0 0 10px' }}
         />
-        <button type="submit" style={buttonStyle}>
+        <button type="submit" style={{ ...buttonStyle, marginLeft: '0.5em', borderRadius: '0 10px 10px 0' }}>
           Get Weather
+        </button>
+        <button type="button" style={{ ...buttonStyle, marginLeft: '0.5em' }} onClick={handleRetrieveLocation}>
+          Use Current Location
         </button>
       </form>
       {weather && (
