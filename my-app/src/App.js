@@ -49,7 +49,9 @@ const App = () => {
   const appStyle = {
     fontFamily: 'Arial, sans-serif',
     textAlign: 'center',
-    padding: '1em'
+    padding: '1em',
+    backgroundColor: '#726EFF',
+    color: '#FFF'
   };
 
   const inputStyle = {
@@ -57,12 +59,15 @@ const App = () => {
     padding: '0.5em',
     fontSize: '1em',
     margin: '1em 0',
+    backgroundColor: '#SAFFE7',
+    border: 'none',
+    borderRadius: '5px'
   };
 
   const buttonStyle = {
     padding: '0.5em 1em',
     fontSize: '1em',
-    backgroundColor: '#007BFF',
+    backgroundColor: '#08C6AB',
     color: '#FFF',
     border: 'none',
     borderRadius: '5px',
@@ -70,11 +75,29 @@ const App = () => {
   };
 
   const weatherStyle = {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#37465B',
     borderRadius: '10px',
     padding: '1em',
     margin: '1em 0'
   };
+
+  const cardStyle = {
+    backgroundColor: '#212B38',
+    borderRadius: '10px',
+    padding: '1em',
+    margin: '1em',
+    display: 'inline-block',
+    verticalAlign: 'top',
+    minWidth: '200px'
+  };
+
+  const imageStyle = {
+    width: '60px',
+    height: '60px',
+    marginBottom: '0.5em'
+  };
+
+  const getImageUrl = (iconCode) => `https://openweathermap.org/img/wn/${iconCode}.png`;
 
   return (
     <div style={appStyle}>
@@ -87,7 +110,9 @@ const App = () => {
           placeholder="Enter city..."
           style={inputStyle}
         />
-        <button type="submit" style={buttonStyle}>Get Weather</button>
+        <button type="submit" style={buttonStyle}>
+          Get Weather
+        </button>
       </form>
       {weather && (
         <div style={weatherStyle}>
@@ -104,16 +129,18 @@ const App = () => {
       {forecast && (
         <div style={weatherStyle}>
           <h2>5-day Forecast</h2>
-          {forecast.slice(0, 5).map((f, index) => (
-            <div key={index}>
-              <p>
-                {new Date(f.dt * 1000).toLocaleDateString()}{' '}
-                {new Date(f.dt * 1000).toLocaleTimeString()}
-              </p>w
-              <p>{Math.round(f.main.temp - 273.15)}°C</p>
-              <p>{f.weather[0].main} - {f.weather[0].description}</p>
-            </div>
-          ))}
+          <div>
+            {forecast.slice(0, 5).map((f, index) => (
+              <div key={index} style={cardStyle}>
+                <p>{new Date(f.dt * 1000).toLocaleDateString()}</p>
+                <img src={getImageUrl(f.weather[0].icon)} alt={f.weather[0].description} style={imageStyle} />
+                <p>{Math.round(f.main.temp - 273.15)}°C</p>
+                <p>
+                  {f.weather[0].main} - {f.weather[0].description}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
